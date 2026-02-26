@@ -1,0 +1,144 @@
+schema: spec-driven
+
+context: |
+  # Project: Project Management Tools
+  A simple project management tool with Kanban board features to help teams
+  manage tasks organized into Backlog, Todo, In Progress, and Done columns.
+
+  ## Tech Stack
+  - **Framework**: Next.js 16 (App Router, monolith architecture)
+  - **Language**: TypeScript 5 (strict mode)
+  - **Runtime**: React 19, React DOM 19
+  - **Styling**: Tailwind CSS v4 (using `@import "tailwindcss"` and `@theme inline`)
+  - **UI Components**: shadcn/ui (Radix UI primitives + Tailwind CSS)
+  - **Font**: Geist Sans & Geist Mono (via next/font/google)
+  - **Package Manager**: pnpm (workspace enabled)
+  - **Linting**: ESLint 9 with eslint-config-next
+  - **Build Tool**: Next.js built-in (Turbopack for dev)
+  - **PostCSS**: @tailwindcss/postcss
+
+  ## Architecture
+  - **Pattern**: Monolith — single Next.js app handling frontend, API, and business logic
+  - **Routing**: App Router (`app/` directory) with file-based routing
+  - **Rendering**: Server Components by default, Client Components with `"use client"` directive only when needed (interactivity, hooks, browser APIs)
+  - **Data Fetching**: Server Components for reads, Server Actions for mutations
+  - **API**: Route Handlers (`app/api/`) for external integrations if needed; prefer Server Actions for internal mutations
+  - **State Management**: React state + context for client-side; server state via Server Components
+  - **Path Alias**: `@/*` maps to project root
+
+  ## Project Structure
+  ```
+  app/                    # Next.js App Router pages & layouts
+    (dashboard)/          # Dashboard route group
+    api/                  # API route handlers (if needed)
+    layout.tsx            # Root layout
+    globals.css           # Global styles & Tailwind theme config
+  components/             # Reusable UI components
+    ui/                   # shadcn/ui components (auto-generated)
+    kanban/               # Kanban-specific components
+  lib/                    # Utility functions, helpers, constants
+  hooks/                  # Custom React hooks
+  types/                  # Shared TypeScript type definitions
+  public/                 # Static assets
+  ```
+
+  ## Conventions
+
+  ### File Naming
+  - Use **kebab-case** for files and directories (e.g., `kanban-board.tsx`, `task-card.tsx`)
+  - Page files: `page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx`
+  - Component files: named after the component in kebab-case (e.g., `task-card.tsx` for `TaskCard`)
+  - Utility/helper files: descriptive kebab-case (e.g., `format-date.ts`, `kanban-utils.ts`)
+
+  ### Code Style
+  - Use **TypeScript** for all files (`.ts`, `.tsx`) — no plain JS
+  - Use **named exports** for components and utilities; use **default exports** only for page/layout files
+  - Use **arrow functions** for components: `const TaskCard = () => { ... }`
+  - Use **interface** for object shapes, **type** for unions/intersections
+  - Prefer **const** over let; never use var
+  - Use **async/await** over raw Promises
+  - Destructure props in function parameters
+  - Keep components focused and small; extract logic into custom hooks or utility functions
+
+  ### Component Patterns
+  - **Server Components** by default — only add `"use client"` when component needs interactivity
+  - Use shadcn/ui components as building blocks; customize via Tailwind classes
+  - Compose complex UI from smaller, reusable components
+  - Keep business logic out of components — use hooks or utility functions
+  - Use `React.forwardRef` when wrapping interactive elements
+
+  ### Styling
+  - Use **Tailwind CSS v4** utility classes for all styling
+  - Use `@theme inline` block in `globals.css` for custom theme tokens (colors, fonts, spacing)
+  - Use CSS custom properties (`var(--...)`) for dynamic theming (light/dark mode)
+  - Prefer Tailwind utilities over custom CSS; use `@apply` sparingly
+  - Use `cn()` utility (from `lib/utils.ts`) for conditional class merging (clsx + tailwind-merge)
+  - Follow shadcn/ui theming conventions for consistent component styling
+  - Support dark mode via CSS `prefers-color-scheme` or class-based toggle
+
+  ### Git & Commits
+  - Use **conventional commits**: `feat:`, `fix:`, `refactor:`, `chore:`, `docs:`, `style:`, `test:`
+  - Write commit messages in English, imperative mood
+  - Keep commits atomic and focused
+
+  ## Domain Knowledge
+
+  ### Core Concepts
+  - **Project**: A workspace that contains a Kanban board and its associated tasks
+  - **Board**: A Kanban board with columns representing workflow stages
+  - **Column/Status**: The workflow stages a task progresses through:
+    1. **Backlog** — Tasks identified but not yet planned for work
+    2. **Todo** — Tasks planned and ready to be picked up
+    3. **In Progress** — Tasks currently being worked on
+    4. **Done** — Tasks that have been completed
+  - **Task (Card)**: A unit of work with a title, description, assignee, priority, and status
+  - **Drag & Drop**: Tasks can be moved between columns via drag-and-drop to update their status
+
+  ### Task Properties
+  - **Title**: Short, descriptive name of the task (required)
+  - **Description**: Detailed explanation of the task (optional, supports markdown)
+  - **Status**: Current column/stage (Backlog | Todo | In Progress | Done)
+  - **Priority**: Urgency level (Low | Medium | High | Urgent)
+  - **Assignee**: Team member responsible for the task
+  - **Due Date**: Target completion date (optional)
+  - **Labels/Tags**: Categorization tags (e.g., bug, feature, improvement)
+  - **Order**: Position within a column for sorting
+
+  ### User Interactions
+  - Create, edit, and delete tasks
+  - Drag and drop tasks between columns to change status
+  - Filter and search tasks by assignee, priority, label, or keyword
+  - View task details in a modal or slide-over panel
+  - Reorder tasks within a column
+
+  ## General
+  - Bahasa kode: English (variabel, fungsi, class, komentar, skema database, nama folder/file)
+  - Bahasa dokumentasi: Indonesian (boleh campur English untuk istilah teknis)
+
+rules:
+  proposal:
+    - Keep proposals concise and focused on the specific feature or change
+    - Always include a "Non-goals" section to clarify scope
+    - Reference existing components and patterns from the codebase
+    - Write proposals in Indonesian, technical terms boleh English
+  specs:
+    - Define TypeScript interfaces for all data models
+    - Specify component props with TypeScript types
+    - Include accessibility requirements (ARIA labels, keyboard navigation)
+  tasks:
+    - Break tasks into chunks of max 2 hours of work
+    - Each task should be independently testable
+    - Include acceptance criteria for each task
+    - Order tasks by dependency (foundational work first)
+    - |
+      Setiap task WAJIB diberi label kategori dengan prefix:
+        [BE]   — Backend (API, service, database, queue, AI/RAG)
+        [FE]   — Frontend (UI component, page, styling, client logic)
+        [DOCS] — Dokumentasi (README, API docs, guides)
+      Format penomoran: <group>.<urutan> [LABEL] <deskripsi task>
+      Contoh:
+        1.1 [BE] Membuat schema database untuk tabel users
+        1.2 [BE] Membuat API endpoint POST /api/v1/auth/login
+        2.1 [FE] Membuat halaman login dengan form validation
+        2.2 [FE] Integrasi login page dengan API auth
+        3.1 [DOCS] Menulis dokumentasi API authentication
